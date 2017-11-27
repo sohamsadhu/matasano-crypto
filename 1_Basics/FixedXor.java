@@ -1,4 +1,6 @@
-public class FixedXor_2 {
+// Second problem
+
+public class FixedXor {
 
   public static final char[] HEX_LOOKUP = 
       {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f'};
@@ -13,7 +15,7 @@ public class FixedXor_2 {
   }
 
   public String xorHexStrings(String hex1, String hex2) throws Exception {
-    HexToBase64_1 hexToBase64 = new HexToBase64_1();
+    HexToBase64 hexToBase64 = new HexToBase64();
 
     if (hex1.length() != hex2.length()) throw new Exception("Given hexadecimal strings are not of same length.");
     if (!hexToBase64.isHex(hex1)) throw new Exception("String 1 is not in hexadecimal format.");
@@ -34,7 +36,7 @@ public class FixedXor_2 {
   }
 
   public static void main(String[] args) {
-    FixedXor_2 fxor = new FixedXor_2();
+    FixedXor fxor = new FixedXor();
     String hex1 = "1c0111001f010100061a024b53535009181c";
     String hex2 = "686974207468652062756c6c277320657965";
     try {

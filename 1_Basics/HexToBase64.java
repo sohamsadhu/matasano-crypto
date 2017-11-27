@@ -1,6 +1,8 @@
+// First problem
+
 import java.util.regex.Pattern;
 
-public class HexToBase64_1 {
+public class HexToBase64 {
 
   public static final String HEX_PATTERN = "^[0-9a-fA-F]+$";
   public static final char[] BASE_64_LOOKUP = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
@@ -59,7 +61,7 @@ public class HexToBase64_1 {
   }
 
   public static void main(String [] args) {
-    HexToBase64_1 hb = new HexToBase64_1();
+    HexToBase64 hb = new HexToBase64();
     String input = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d";
     String expectedOutput = "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t";
     try {
