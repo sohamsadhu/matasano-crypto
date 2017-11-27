@@ -1,6 +1,6 @@
 import java.util.regex.Pattern;
 
-class HexToBase64_1 {
+public class HexToBase64_1 {
 
   public static final String HEX_PATTERN = "^[0-9a-fA-F]+$";
   public static final char[] BASE_64_LOOKUP = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 
