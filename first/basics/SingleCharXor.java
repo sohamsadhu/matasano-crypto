@@ -8,9 +8,7 @@ public class SingleCharXor {
   public String getClosestString(String file, SingleByteXor sbxor, HexToBase64 hb64) {
     String output = "";
     double min = Double.MAX_VALUE;
-    try (
-      BufferedReader br = new BufferedReader(new FileReader(file));
-    ) {
+    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
       String line;
       while ((line = br.readLine()) != null) {
         String s = sbxor.getHighestMatch(line);
