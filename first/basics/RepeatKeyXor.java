@@ -11,19 +11,23 @@ public class RepeatKeyXor {
     return result;
   }
 
-  public String getHexByRepeatXor(String input, String key, FixedXor fxor) {
-    int length = input.length();
-    byte[] inputBytes = getBytesFromString(input);
-    int keyLength = key.length();
-    byte[] xorKey = getBytesFromString(key);
+  public byte[] xorInputWithKey(byte[] input, byte[] xorKey) {
+    int length = input.length;
+    int keyLength = xorKey.length;
     byte[] result = new byte[length];
     for (int i = 0; i < length; i++) {
-      int temp1 = (int) inputBytes[i];
+      int temp1 = (int) input[i];
       int temp2 = (int) xorKey[i % keyLength];
       int temp3 = temp1 ^ temp2;
       result[i] = (byte) (temp3 & 0xFF);
     }
-    return fxor.convertBytesToHexString(result);
+    return result;
+  }
+
+  public String getHexByRepeatXor(String input, String key, FixedXor fxor) {
+    byte[] inputBytes = getBytesFromString(input);
+    byte[] xorKey = getBytesFromString(key);
+    return fxor.convertBytesToHexString(xorInputWithKey(inputBytes, xorKey));
   }
 
   public static void main(String [] args) {
