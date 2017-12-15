@@ -14,6 +14,21 @@ public class FixedXor {
     return (new String(result));
   }
 
+  public byte[] xorTwoByteArrays(byte[] bytes1, byte[] bytes2) throws Exception {
+    int length = bytes1.length;
+    if (length != bytes2.length) throw new Exception("Cannot XOR two byte arrays not of equal length.");
+
+    byte[] bytes3 = new byte[length];
+    int temp1, temp2, temp3;
+    for (int i = 0; i < length; i++) {
+      temp1 = (int) bytes1[i];
+      temp2 = (int) bytes2[i];
+      temp3 = temp1 ^ temp2;
+      bytes3[i] = (byte) (temp3 & 0xFF);
+    }
+    return bytes3;
+  }
+
   public String xorHexStrings(String hex1, String hex2) throws Exception {
     HexToBase64 hexToBase64 = new HexToBase64();
 
@@ -23,16 +38,7 @@ public class FixedXor {
 
     byte[] hexBytes1 = hexToBase64.convertHexToBytes(hex1);
     byte[] hexBytes2 = hexToBase64.convertHexToBytes(hex2);
-    byte[] hexBytes3 = new byte[hexBytes1.length];
-
-    int temp1, temp2, temp3;
-    for (int i = 0; i < hexBytes1.length; i++) {
-      temp1 = (int) hexBytes1[i];
-      temp2 = (int) hexBytes2[i];
-      temp3 = temp1 ^ temp2;
-      hexBytes3[i] = (byte) (temp3 & 0xFF);
-    }
-    return convertBytesToHexString(hexBytes3);
+    return convertBytesToHexString(xorTwoByteArrays(hexBytes1, hexBytes2));
   }
 
   public static void main(String[] args) {
