@@ -1,8 +1,16 @@
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.regex.Pattern;
+
 // Problem 6
 
 public class BreakRepeatKeyXor {
 
   public static final byte [] BYTE_MASK = {0x55, 0x33, 0x0F};
+  public static final String BASE64_PATTERN = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
 
   public int getHammingWeight(byte b) {
     byte temp1, temp2;
@@ -36,6 +44,55 @@ public class BreakRepeatKeyXor {
     return getHammingDistance(rkxor.getBytesFromString(s1), rkxor.getBytesFromString(s2), fxor);
   }
 
+  public String getBase64StringFromFile(String file) {
+    StringBuilder sb = new StringBuilder("");
+    try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+      String line;
+      while ((line = br.readLine()) != null) {
+        sb.append(line);
+      }
+    } catch(IOException ioex) {
+      ioex.printStackTrace();
+    }
+    return sb.toString();
+  }
+
+  public boolean isBase64(String base64) {
+    return Pattern.matches(BASE64_PATTERN, base64);
+  }
+
+  public Map<Character, Integer> getBase64CharacterValueMap() {
+    Map<Character, Integer> base64CharValueMap = new HashMap<>();
+    int length = HexToBase64.BASE_64_LOOKUP.length;
+    for (int i = 0; i < length; i++) {
+      base64CharValueMap.put(HexToBase64.BASE_64_LOOKUP[i], i);
+    }
+    return base64CharValueMap;
+  }
+
+  public byte[] convertBase64StringToBytes(String base64) throws Exception {
+    if (!isBase64(base64)) {
+      throw new Exception("Provided string "+ base64 +" is not in proper base 64 format.");
+    }
+    int base64Length = base64.length() * 3 / 4;
+    int byteLength = base64Length;
+    if ('=' == base64.charAt(base64.length() - 1)) {
+      byteLength--;
+      if ('=' == base64.charAt(base64.length() - 2)) {
+        byteLength--;
+      }
+    }
+    Map<Character, Integer> base64CharValueMap = getBase64CharacterValueMap();
+    byte[] result = new byte[byteLength];
+    int loopLength = (byteLength == base64Length) ? byteLength : base64Length - 4;
+    for (int i = 0, j = 0; i < loopLength; i += 3, j += 4) {
+      result[i]     = (byte) ((base64CharValueMap.get(base64.charAt(j)) << 2) | (base64CharValueMap.get(base64.charAt(j + 1)) >>> 4));
+      result[i + 1] = (byte) ((base64CharValueMap.get(base64.charAt(j + 1)) << 4) | (base64CharValueMap.get(base64.charAt(j + 2)) >>> 4));
+      result[i + 2] = (byte) ((base64CharValueMap.get(base64.charAt(j + 2)) << 6) | base64CharValueMap.get(base64.charAt(j + 3)));
+    }
+    return null;
+  }
+
   public static void main(String [] args) {
     BreakRepeatKeyXor brxor = new BreakRepeatKeyXor();
     RepeatKeyXor rkxor = new RepeatKeyXor();
@@ -47,5 +104,8 @@ public class BreakRepeatKeyXor {
     } catch(Exception e) {
       e.printStackTrace();
     }
+    // String s = brxor.getBase64StringFromFile("6.txt");
+    // System.out.println("File read is "+ s);
+    // System.out.println("File is base64 "+ brxor.isBase64(s));
   }
 }
