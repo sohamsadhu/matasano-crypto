@@ -74,11 +74,12 @@ public class BreakRepeatKeyXor {
     if (!isBase64(base64)) {
       throw new Exception("Provided string "+ base64 +" is not in proper base 64 format.");
     }
-    int base64Length = base64.length() * 3 / 4;
+    int stringLength = base64.length();
+    int base64Length = stringLength * 3 / 4;
     int byteLength = base64Length;
-    if ('=' == base64.charAt(base64.length() - 1)) {
+    if ('=' == base64.charAt(stringLength - 1)) {
       byteLength--;
-      if ('=' == base64.charAt(base64.length() - 2)) {
+      if ('=' == base64.charAt(stringLength - 2)) {
         byteLength--;
       }
     }
@@ -87,10 +88,38 @@ public class BreakRepeatKeyXor {
     int loopLength = (byteLength == base64Length) ? byteLength : base64Length - 4;
     for (int i = 0, j = 0; i < loopLength; i += 3, j += 4) {
       result[i]     = (byte) ((base64CharValueMap.get(base64.charAt(j)) << 2) | (base64CharValueMap.get(base64.charAt(j + 1)) >>> 4));
-      result[i + 1] = (byte) ((base64CharValueMap.get(base64.charAt(j + 1)) << 4) | (base64CharValueMap.get(base64.charAt(j + 2)) >>> 4));
+      result[i + 1] = (byte) ((base64CharValueMap.get(base64.charAt(j + 1)) << 4) | (base64CharValueMap.get(base64.charAt(j + 2)) >>> 2));
       result[i + 2] = (byte) ((base64CharValueMap.get(base64.charAt(j + 2)) << 6) | base64CharValueMap.get(base64.charAt(j + 3)));
     }
-    return null;
+    if (base64Length > byteLength) {
+      result[loopLength + 1] = (byte) ((base64CharValueMap.get(base64.charAt(stringLength - 4)) << 2) | 
+        (base64CharValueMap.get(base64.charAt(stringLength - 3)) >>> 4));
+      if ('=' != base64.charAt(stringLength - 2)) {
+        result[byteLength - 1] = (byte) ((base64CharValueMap.get(base64.charAt(stringLength - 3)) << 4) | 
+          (base64CharValueMap.get(base64.charAt(stringLength - 2)) >>> 2));
+      }
+    }
+    return result;
+  }
+
+  public void verifyBase64Decoder() {
+    String base64 = "TWFuIGlzIGRpc3Rpbmd1aXNoZWQsIG5vdCBvbmx5IGJ5IGhpcyByZWFzb24sIGJ1dCBieSB0aGlz" +
+      "IHNpbmd1bGFyIHBhc3Npb24gZnJvbSBvdGhlciBhbmltYWxzLCB3aGljaCBpcyBhIGx1c3Qgb2Yg" +
+      "dGhlIG1pbmQsIHRoYXQgYnkgYSBwZXJzZXZlcmFuY2Ugb2YgZGVsaWdodCBpbiB0aGUgY29udGlu" +
+      "dWVkIGFuZCBpbmRlZmF0aWdhYmxlIGdlbmVyYXRpb24gb2Yga25vd2xlZGdlLCBleGNlZWRzIHRo" +
+      "ZSBzaG9ydCB2ZWhlbWVuY2Ugb2YgYW55IGNhcm5hbCBwbGVhc3VyZS4=";
+    String base64Decoded = "Man is distinguished, not only by his reason, but by this singular passion from" +
+      " other animals, which is a lust of the mind, that by a perseverance of delight" +
+      " in the continued and indefatigable generation of knowledge, exceeds the short" +
+      " vehemence of any carnal pleasure.";
+      System.out.println("Decoded string should be of length "+ base64Decoded.length());
+    try {
+      byte[] base64Bytes = convertBase64StringToBytes(base64);
+      String s = new String(base64Bytes, "UTF-8");
+      System.out.println("Base 64 decoder to byte works "+ s.equals(base64Decoded));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   public static void main(String [] args) {
@@ -107,5 +136,6 @@ public class BreakRepeatKeyXor {
     // String s = brxor.getBase64StringFromFile("6.txt");
     // System.out.println("File read is "+ s);
     // System.out.println("File is base64 "+ brxor.isBase64(s));
+    brxor.verifyBase64Decoder();
   }
 }
