@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 public class BreakRepeatKeyXor {
 
   public static final byte [] BYTE_MASK = {0x55, 0x33, 0x0F};
+  // Base 64 pattern string obtained from https://stackoverflow.com/a/8571649
   public static final String BASE64_PATTERN = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$";
 
   public int getHammingWeight(byte b) {
@@ -87,7 +88,7 @@ public class BreakRepeatKeyXor {
     byte[] result = new byte[byteLength];
     int loopLength = (byteLength == base64Length) ? byteLength : base64Length - 4;
     for (int i = 0, j = 0; i < loopLength; i += 3, j += 4) {
-      result[i]     = (byte) ((base64CharValueMap.get(base64.charAt(j)) << 2) | (base64CharValueMap.get(base64.charAt(j + 1)) >>> 4));
+      result[i]     = (byte) ((base64CharValueMap.get(base64.charAt(j)) << 2)     | (base64CharValueMap.get(base64.charAt(j + 1)) >>> 4));
       result[i + 1] = (byte) ((base64CharValueMap.get(base64.charAt(j + 1)) << 4) | (base64CharValueMap.get(base64.charAt(j + 2)) >>> 2));
       result[i + 2] = (byte) ((base64CharValueMap.get(base64.charAt(j + 2)) << 6) | base64CharValueMap.get(base64.charAt(j + 3)));
     }
