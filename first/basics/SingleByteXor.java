@@ -52,7 +52,7 @@ public class SingleByteXor {
     return sb.toString();
   }
 
-  public byte[] getLowestDeviationBytes(byte[][] xoredBytes) {
+  public CryptResult getLowestDeviationBytes(byte[][] xoredBytes) {
     double min = Double.MAX_VALUE;
     int index = 0;
     int xoredLength = xoredBytes.length;
@@ -63,14 +63,18 @@ public class SingleByteXor {
         index = i;
       }
     }
-    return xoredBytes[index];
+    CryptResult result = new CryptResult();
+    result.setSingleKey((byte) index);
+    result.setExtractedBytes(xoredBytes[index]);
+    return result;
   }
 
   public String getHighestMatch(String hexInput) {
     HexToBase64 hb64 = new HexToBase64();
     byte[] hexBytes = hb64.convertHexToBytes(hexInput);
     byte[][] xoredBytes = getEveryXor(hexBytes);
-    return getAsciiStringFromBytes(getLowestDeviationBytes(xoredBytes));
+    CryptResult result = getLowestDeviationBytes(xoredBytes);
+    return getAsciiStringFromBytes(result.getExtractedBytes());
   }
 
   public static void main(String [] args) {

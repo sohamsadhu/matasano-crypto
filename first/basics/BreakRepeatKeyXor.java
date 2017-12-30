@@ -148,10 +148,90 @@ public class BreakRepeatKeyXor {
     }
   }
 
+  public double getEditDistanceForByteSize(byte[] bytes, int sampleByteSize, FixedXor fxor) {
+    byte[][] samples = new byte[4][sampleByteSize];
+    for (int i = 0; i < 4; i++) {
+      for (int j = 0; j < sampleByteSize; j++) {
+        samples[i][j] = bytes[i * sampleByteSize + j];
+      }
+    }
+    double editDistance = 0.0;
+    for (int i = 0; i < 4; i++) {
+      for (int j = i + 1; j < 4; j++) {
+        try {
+          editDistance += (getHammingDistance(samples[i], samples[j], fxor) / (sampleByteSize * 1.0));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+    }
+    return (editDistance / 6.0);
+  }
+
+  public int getKeySize(byte[] encoded, int startSize, int endSize, FixedXor fxor) {
+    int keySize = 0;
+    double editDistance = Double.MAX_VALUE;
+    int keyStartSize = startSize <= 2 ? 2 : startSize;
+    int keyEndSize = (endSize > startSize && endSize <= 40) ? endSize : 40;
+    for (int i = keyStartSize ; i <= keyEndSize; i++) {
+      double temp = getEditDistanceForByteSize(encoded, i, fxor);
+      if (temp < editDistance) {
+        editDistance = temp;
+        keySize = i;
+      }
+    }
+    return keySize;
+  }
+
+  public byte[][] getTransposedBlocks(byte[] base64Bytes, int keySize) {
+    int byteLength = base64Bytes.length;
+    byte[][] transposedBlocks = new byte[keySize][keySize];
+    int blockSize = keySize * keySize;
+    int padding = byteLength >= blockSize? 0 : blockSize - byteLength;
+    int loopLength = (padding > 0) ? blockSize - padding : blockSize; 
+    for (int i = 0; i < loopLength; i++) {
+      transposedBlocks[i % keySize][i / keySize] = base64Bytes[i];
+    }
+    if (padding > 0) {
+      int start = keySize - padding;
+      for (int i = start; i < keySize; i++) {
+        transposedBlocks[keySize - 1][i] = (byte) 0xFF;
+      }
+    }
+    return transposedBlocks;
+  }
+
+  public byte[] getKey(byte[][] transposedBlocks, SingleByteXor sxor, int keySize) {
+    byte[] key = new byte[keySize];
+    for (int i = 0; i < keySize; i++) {
+      byte[][] xoredBytes = sxor.getEveryXor(transposedBlocks[i]);
+      key[i] = sxor.getLowestDeviationBytes(xoredBytes).getSingleKey();
+    }
+    return key;
+  }
+
+  public void decodeVigenereFile(String base64File, FixedXor fxor, SingleByteXor sxor, RepeatKeyXor rxor) {
+    String base64String = getBase64StringFromFile(base64File);
+    try {
+      byte[] base64Bytes = convertBase64StringToBytes(base64String);
+      int keySize = getKeySize(base64Bytes, 2, 40, fxor);
+      byte[][] transposedBlocks = getTransposedBlocks(base64Bytes, keySize);
+      byte[] key = getKey(transposedBlocks, sxor, keySize);
+      String keyToDecode = sxor.getAsciiStringFromBytes(key);
+      System.out.println("String to decode is "+ keyToDecode);
+      byte[] decoded = rxor.xorInputWithKey(base64Bytes, key);
+      String decodedString = sxor.getAsciiStringFromBytes(decoded);
+      System.out.println("Decoded file is: "+ decodedString);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   public static void main(String [] args) {
     BreakRepeatKeyXor brxor = new BreakRepeatKeyXor();
     RepeatKeyXor rkxor = new RepeatKeyXor();
     FixedXor fxor = new FixedXor();
+    SingleByteXor sxor = new SingleByteXor();
     String input1 = "this is a test";
     String input2 = "wokka wokka!!!";
     try {
@@ -159,9 +239,6 @@ public class BreakRepeatKeyXor {
     } catch(Exception e) {
       e.printStackTrace();
     }
-    // String s = brxor.getBase64StringFromFile("6.txt");
-    // System.out.println("File read is "+ s);
-    // System.out.println("File is base64 "+ brxor.isBase64(s));
-    brxor.verifyBase64Decoder();
+    brxor.decodeVigenereFile("6.txt", fxor, sxor, rkxor);
   }
 }
