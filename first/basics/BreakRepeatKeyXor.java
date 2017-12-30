@@ -86,18 +86,21 @@ public class BreakRepeatKeyXor {
     }
     Map<Character, Integer> base64CharValueMap = getBase64CharacterValueMap();
     byte[] result = new byte[byteLength];
-    int loopLength = (byteLength == base64Length) ? byteLength : base64Length - 4;
-    for (int i = 0, j = 0; i < loopLength; i += 3, j += 4) {
+    int loopLength = (byteLength == base64Length) ? stringLength : stringLength - 4;
+    for (int i = 0, j = 0; j < loopLength; i += 3, j += 4) {
       result[i]     = (byte) ((base64CharValueMap.get(base64.charAt(j)) << 2)     | (base64CharValueMap.get(base64.charAt(j + 1)) >>> 4));
       result[i + 1] = (byte) ((base64CharValueMap.get(base64.charAt(j + 1)) << 4) | (base64CharValueMap.get(base64.charAt(j + 2)) >>> 2));
       result[i + 2] = (byte) ((base64CharValueMap.get(base64.charAt(j + 2)) << 6) | base64CharValueMap.get(base64.charAt(j + 3)));
     }
     if (base64Length > byteLength) {
-      result[loopLength + 1] = (byte) ((base64CharValueMap.get(base64.charAt(stringLength - 4)) << 2) | 
+      byte temp = (byte) ((base64CharValueMap.get(base64.charAt(stringLength - 4)) << 2) | 
         (base64CharValueMap.get(base64.charAt(stringLength - 3)) >>> 4));
       if ('=' != base64.charAt(stringLength - 2)) {
+        result[byteLength - 2] = temp;
         result[byteLength - 1] = (byte) ((base64CharValueMap.get(base64.charAt(stringLength - 3)) << 4) | 
           (base64CharValueMap.get(base64.charAt(stringLength - 2)) >>> 2));
+      } else {
+        result[byteLength - 1] = temp;
       }
     }
     return result;
@@ -113,11 +116,33 @@ public class BreakRepeatKeyXor {
       " other animals, which is a lust of the mind, that by a perseverance of delight" +
       " in the continued and indefatigable generation of knowledge, exceeds the short" +
       " vehemence of any carnal pleasure.";
-      System.out.println("Decoded string should be of length "+ base64Decoded.length());
+    String decoded2 = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. " +
+      "Lorem Ipsum has been the industry's standard dummy text ever since the 1500s,";
+    String base64_2 = "TG9yZW0gSXBzdW0gaXMgc2ltcGx5IGR1bW15IHRleHQgb2YgdGhlIHByaW50aW5nIGFuZCB0eXBlc2V0dGl" + 
+      "uZyBpbmR1c3RyeS4gTG9yZW0gSXBzdW0gaGFzIGJlZW4gdGhlIGluZHVzdHJ5J3Mgc3RhbmRhcmQgZHVtbXkgdGV4dCBldmVyIHNp" +
+      "bmNlIHRoZSAxNTAwcyw=";
+    String decoded3 = "when an unknown printer took a galley of type and scrambled it to make a type specimen " +
+      "book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining " +
+      "essentially unchanged. It was popularised in the 1960s with";
+    String base64_3 = "d2hlbiBhbiB1bmtub3duIHByaW50ZXIgdG9vayBhIGdhbGxleSBvZiB0eXBlIGFuZCBzY3JhbWJsZWQgaXQgdG8gbWFr" +
+      "ZSBhIHR5cGUgc3BlY2ltZW4gYm9vay4gSXQgaGFzIHN1cnZpdmVkIG5vdCBvbmx5IGZpdmUgY2VudHVyaWVzLCBidXQgYWxzbyB0" +
+      "aGUgbGVhcCBpbnRvIGVsZWN0cm9uaWMgdHlwZXNldHRpbmcsIHJlbWFpbmluZyBlc3NlbnRpYWxseSB1bmNoYW5nZWQuIEl0IHdhc" +
+      "yBwb3B1bGFyaXNlZCBpbiB0aGUgMTk2MHMgd2l0aA==";
+    String decoded4 = "release of Letraset sheets containing Lorem Ipsum passage";
+    String base64_4 = "cmVsZWFzZSBvZiBMZXRyYXNldCBzaGVldHMgY29udGFpbmluZyBMb3JlbSBJcHN1bSBwYXNzYWdl";
     try {
       byte[] base64Bytes = convertBase64StringToBytes(base64);
       String s = new String(base64Bytes, "UTF-8");
       System.out.println("Base 64 decoder to byte works "+ s.equals(base64Decoded));
+      base64Bytes = convertBase64StringToBytes(base64_2);
+      s = new String(base64Bytes, "UTF-8");
+      System.out.println("Base 64 decoder to byte works for 2 "+ s.equals(decoded2));
+      base64Bytes = convertBase64StringToBytes(base64_3);
+      s = new String(base64Bytes, "UTF-8");
+      System.out.println("Base 64 decoder to byte works for 3 "+ s.equals(decoded3));
+      base64Bytes = convertBase64StringToBytes(base64_4);
+      s = new String(base64Bytes, "UTF-8");
+      System.out.println("Base 64 decoder to byte works for 4 "+ s.equals(decoded4));
     } catch (Exception e) {
       e.printStackTrace();
     }
