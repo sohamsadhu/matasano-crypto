@@ -6,15 +6,67 @@
 // Decrypt it. You know the key, after all.
 // Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher.
 
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.Key;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
 public class AesEcbMode {
 
-  public void something(String file, BreakRepeatKeyXor brkxor) {
+  public static final String KEY                 = "YELLOW SUBMARINE";
+  public static final String CRYPT_ALGO_MODE_PAD = "AES/ECB/NoPadding";
+  public static final String KEY_ALGORITHM       = "AES";
+
+  public byte[] getBytesFromBase64EncodedFile(String file, BreakRepeatKeyXor brkxor) {
     String encodedText = brkxor.getBase64StringFromFile(file);
-    byte[] encodedBytes = brkxor.convertBase64StringToBytes(encodedText);
+    try {
+      byte[] encodedBytes = brkxor.convertBase64StringToBytes(encodedText);
+      return encodedBytes;
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
+    return null;
+  }
+
+  public String decryptCryptoBytes(byte[] cipherBytes, String key, String cryptAlgoModePad, String keyAlgorithm) {
+    try {
+      Cipher aesECBDecrypter = Cipher.getInstance(cryptAlgoModePad == null ? CRYPT_ALGO_MODE_PAD : cryptAlgoModePad);
+      Key secretKey = new SecretKeySpec(key.getBytes(), keyAlgorithm == null ? KEY_ALGORITHM : keyAlgorithm);
+      aesECBDecrypter.init(Cipher.DECRYPT_MODE, secretKey);
+      byte[] decryptedBytes = aesECBDecrypter.doFinal(cipherBytes);
+      String decryptedText = new String(decryptedBytes);
+      System.out.println("Decrypted text is: "+ decryptedText);
+      return decryptedText;
+    } catch (NoSuchAlgorithmException noSuchAlgorithmException) {
+      System.out.println("No such algorithm exists "+ noSuchAlgorithmException);
+    } catch (NoSuchPaddingException noSuchPaddingException) {
+      System.out.println("No such padding exists "+ noSuchPaddingException);
+    } catch (InvalidKeyException invalidKeyException) {
+      System.out.println("The key is invalid "+ invalidKeyException);
+    } catch (BadPaddingException badPaddingException) {
+      System.out.println("The padding is bad "+ badPaddingException);
+    } catch (IllegalBlockSizeException illegalBlockSizeException) {
+      System.out.println("The block size is illegal "+ illegalBlockSizeException);
+    } catch (IllegalArgumentException illegalArgumentException) {
+      System.out.println("The arguments are illegal "+ illegalArgumentException);
+    } catch (IllegalStateException illegalStateException) {
+      System.out.println("Cipher seems to be in wrong state "+ illegalStateException);
+    }
+    return null;
   }
 
   public static void main(String [] args) {
     AesEcbMode aesEcb = new AesEcbMode();
     BreakRepeatKeyXor brkxor = new BreakRepeatKeyXor();
+    byte[] encryptedBytes = aesEcb.getBytesFromBase64EncodedFile("7.txt", brkxor);
+    if (encryptedBytes != null) {
+      aesEcb.decryptCryptoBytes(encryptedBytes, KEY, CRYPT_ALGO_MODE_PAD, KEY_ALGORITHM);
+    }
   }
 }
