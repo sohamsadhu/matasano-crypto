@@ -6,6 +6,8 @@
 // Decrypt it. You know the key, after all.
 // Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher.
 
+// Just follow this link for implementation guidance https://www.owasp.org/index.php/Using_the_Java_Cryptographic_Extensions
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
