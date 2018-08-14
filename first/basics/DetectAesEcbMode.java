@@ -12,48 +12,33 @@ public class DetectAesEcbMode {
 
   public static final int BLOCK_LENGTH = 16;
 
-  // Returns combination of bytes of block length. Will return null, if the
-  // byte length is not a proper multiple of the block size.
-  public byte[][][] getCombinationBytes(byte[] input, int blockSize) {
-    if (0 != input.length % blockSize) return null;
-    int numBlocks = input.length / blockSize;
-    int numCombinations = (numBlocks * (numBlocks - 1)) / 2;
-    if (numCombinations < 1) return null;
-    byte[][][] result = new byte [numCombinations][2][blockSize];
-    for (int i = 0; i < numCombinations; i++) {
-      for (int j = 0; j < (numBlocks - 1); j++) {
-        for (int k = j + 1; k < numBlocks; k++) {
-          for (int z = 0; z < blockSize; z++) {
-            result[i][0][z] = input[j * blockSize + z];
-            result[i][1][z] = input[k * blockSize + z];
-          }
-        }
+  // You do not need to convert string to bits or bytes to find similarity.
+  // Just finding the similarity in the string hex code itself would do.
+  public int getSimilarBlockScore(String hexLine, int byteLength) {
+    if (hexLine == null || hexLine.isEmpty()) return 0;
+    int blockLength = 2 * byteLength;
+    int size = hexLine.length();
+    int score = 0;
+    for (int i = 0; i <= size - 2 * blockLength; i += blockLength) {
+      for (int j = i + blockLength; j <= size - blockLength; j += blockLength) {
+        if (hexLine.substring(i, i + blockLength).equals(hexLine.substring(j, j + blockLength))) score++;
       }
     }
-    return result;
+    return score;
   }
 
   public Integer getAesEcbLine(String file) {
-    int lineNumber = 0;
-    HexToBase64 hexToBase64 = new HexToBase64();
     try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-      int score = 0;
+      int lineNumber = 1;
       String line;
-      int lineIndex = 0;
       while ((line = br.readLine()) != null) {
-        int similarity = 0;
-        byte[] encryptedBytes = hexToBase64.convertHexToBytes(line.trim());
-        byte[][][] combinations = getCombinationBytes(encryptedBytes, BLOCK_LENGTH);
-        for (int i = 0; i < combinations.length; i++) {
-          if (Arrays.equals(combinations[i][0], combinations[i][1])) {
-            similarity++;
-          }
+        if (getSimilarBlockScore(line, BLOCK_LENGTH) > 0) {
+          System.out.println("Line with AES in ECB mode is "+ line);
+          // Any encryption would not have block repetition. So any block with
+          // repetition is a candidate for ECB block use.
+          return lineNumber;
         }
-        if (similarity >= score) {
-          score = similarity;
-          lineNumber = lineIndex;
-        }
-        lineIndex++;
+        lineNumber++;
       }
       return lineNumber;
     } catch(IOException ioex) {
