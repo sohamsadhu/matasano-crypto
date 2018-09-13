@@ -26,6 +26,7 @@ public class AesEcbMode {
   public static final String KEY                 = "YELLOW SUBMARINE";
   public static final String CRYPT_ALGO_MODE_PAD = "AES/ECB/NoPadding";
   public static final String KEY_ALGORITHM       = "AES";
+  public static final int    CIPHER_MODE         = Cipher.DECRYPT_MODE;
 
   public byte[] getBytesFromBase64EncodedFile(String file, BreakRepeatKeyXor brkxor) {
     String encodedText = brkxor.getBase64StringFromFile(file);
@@ -38,15 +39,13 @@ public class AesEcbMode {
     return null;
   }
 
-  public String decryptCryptoBytes(byte[] cipherBytes, String key, String cryptAlgoModePad, String keyAlgorithm) {
+  public byte[] cryptBytes(final byte[] cipherBytes, String key, String cryptAlgoModePad, String keyAlgorithm, 
+                           final int cipherMode) {
     try {
       Cipher aesECBDecrypter = Cipher.getInstance(cryptAlgoModePad == null ? CRYPT_ALGO_MODE_PAD : cryptAlgoModePad);
       Key secretKey = new SecretKeySpec(key.getBytes(), keyAlgorithm == null ? KEY_ALGORITHM : keyAlgorithm);
-      aesECBDecrypter.init(Cipher.DECRYPT_MODE, secretKey);
-      byte[] decryptedBytes = aesECBDecrypter.doFinal(cipherBytes);
-      String decryptedText = new String(decryptedBytes);
-      System.out.println("Decrypted text is: "+ decryptedText);
-      return decryptedText;
+      aesECBDecrypter.init(cipherMode, secretKey);
+      return aesECBDecrypter.doFinal(cipherBytes);
     } catch (NoSuchAlgorithmException noSuchAlgorithmException) {
       System.out.println("No such algorithm exists "+ noSuchAlgorithmException);
     } catch (NoSuchPaddingException noSuchPaddingException) {
@@ -70,7 +69,8 @@ public class AesEcbMode {
     BreakRepeatKeyXor brkxor = new BreakRepeatKeyXor();
     byte[] encryptedBytes = aesEcb.getBytesFromBase64EncodedFile("7.txt", brkxor);
     if (encryptedBytes != null) {
-      aesEcb.decryptCryptoBytes(encryptedBytes, KEY, CRYPT_ALGO_MODE_PAD, KEY_ALGORITHM);
+      String s  = new String(aesEcb.cryptBytes(encryptedBytes, KEY, CRYPT_ALGO_MODE_PAD, KEY_ALGORITHM, CIPHER_MODE));
+      System.out.println("Decrypted text is: "+ s);
     }
   }
 }

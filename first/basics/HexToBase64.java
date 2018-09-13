@@ -33,7 +33,7 @@ public class HexToBase64 {
     return result;
   }
 
-  public String convertBytesToHex(byte[] hex) {
+  public String convertBytesToBase64(byte[] hex) {
     StringBuilder sb = new StringBuilder("");
     int remaining = hex.length % 3;
     int processEnd = hex.length - remaining;
@@ -62,7 +62,7 @@ public class HexToBase64 {
       throw new Exception("Provided string is now in hexadecimal format.");
     }
     byte[] hexBytes = convertHexToBytes(hex);
-    String base64 = convertBytesToHex(hexBytes);
+    String base64 = convertBytesToBase64(hexBytes);
     return base64;
   }
 
