@@ -1,8 +1,15 @@
+// Problem 4
+// Detect single-character XOR
+// One of the 60-character strings in this file has been encrypted by single-character XOR.
+// Find it.
+// (Your code from #3 should help.)
+
+package first.basics;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-// Problem 4
 public class SingleCharXor {
 
   public CryptResult getClosestString(String file, SingleByteXor sbxor, HexToBase64 hb64) {

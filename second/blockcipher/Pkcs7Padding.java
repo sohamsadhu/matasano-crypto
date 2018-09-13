@@ -6,6 +6,8 @@
 // So: pad any block to a specific block length, by appending the number of bytes of padding to the end of the block. For instance,
 // "YELLOW SUBMARINE" ... padded to 20 bytes would be: "YELLOW SUBMARINE\x04\x04\x04\x04"
 
+package second.blockcipher;
+
 import java.util.Arrays;
 
 public class Pkcs7Padding {

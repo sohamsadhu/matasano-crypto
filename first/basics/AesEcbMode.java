@@ -8,6 +8,8 @@
 
 // Just follow this link for implementation guidance https://www.owasp.org/index.php/Using_the_Java_Cryptographic_Extensions
 
+package first.basics;
+
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;

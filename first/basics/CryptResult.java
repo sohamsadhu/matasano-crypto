@@ -1,3 +1,5 @@
+package first.basics;
+
 public class CryptResult {
 
   private byte singleKey;

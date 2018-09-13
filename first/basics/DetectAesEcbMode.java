@@ -3,6 +3,8 @@
 // Remember that the problem with ECB is that it is stateless and deterministic; 
 // the same 16 byte plaintext block will always produce the same 16 byte ciphertext.
 
+package first.basics;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
