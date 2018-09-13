@@ -12,41 +12,44 @@ package second.blockcipher;
 import first.basics.AesEcbMode;
 import first.basics.BreakRepeatKeyXor;
 import first.basics.FixedXor;
+import first.basics.HexToBase64;
+import second.blockcipher.Pkcs7Padding;
 
 import java.io.File;
 import javax.crypto.Cipher;
 
 public class CbcMode {
 
-  public static final int ENCRYPT_MODE = Cipher.ENCRYPT_MODE;
-  public static final int DECRYPT_MODE = Cipher.DECRYPT_MODE;
-  public static final int BLOCK_SIZE   = 16;
-  public static final String KEY       = "YELLOW SUBMARINE";
+  public static final int ENCRYPT_MODE           = Cipher.ENCRYPT_MODE;
+  public static final int DECRYPT_MODE           = Cipher.DECRYPT_MODE;
+  public static final int BLOCK_SIZE             = 16;
+  public static final String KEY                 = "YELLOW SUBMARINE";
+  public static final String CRYPT_ALGO_MODE_PAD = "AES/CBC/PKCS5PADDING";
   public static final byte[] INITIAL_VECTOR = {
     0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00};
 
-  public String encrypt(String plainText, AesEcbMode aes, FixedXor fxor, int blockSize, String key) {
-    StringBuilder encryptBuilder = new StringBuilder("");
+  public byte[] encrypt(String plainText, AesEcbMode aes, FixedXor fxor, int blockSize, String key, String cryptAlgoModePad) {
+    Pkcs7Padding pkcs7Padding = new Pkcs7Padding();
+    byte[] plainBytes = pkcs7Padding.padBytes(plainText.getBytes(), blockSize);
+    int length        = plainBytes.length;
+    byte[] result     = new byte [length];
     byte[] previous   = INITIAL_VECTOR;
     byte[] block      = new byte [blockSize];
-    byte[] plainBytes = new byte [blockSize];
     byte[] temp       = new byte [blockSize];
-    for (int i = 0; i < (plainText.length() - blockSize); i += blockSize) {
-      String plainString = plainText.substring(i, i + blockSize);
-      // System.out.println(plainString +" "+ i);
-      plainBytes = plainString.getBytes();
+    for (int i = 0; i < (length - blockSize); i += blockSize) {
+      System.arraycopy(plainBytes, i, block, 0, blockSize);
       try  {
-        temp = aes.cryptBytes(fxor.xorTwoByteArrays(plainBytes, previous), key, null, null, ENCRYPT_MODE);
-        encryptBuilder.append(new String(temp));
+        temp = aes.cryptBytes(fxor.xorTwoByteArrays(block, previous), key, cryptAlgoModePad, null, ENCRYPT_MODE);
       } catch(Exception e) {
         e.printStackTrace();
       }
+      System.arraycopy(temp, 0, result, i, blockSize);
       System.arraycopy(temp, 0, previous, 0, blockSize);
     }
-    return encryptBuilder.toString();
+    return result;
   }
 
   public String decrypt(byte[] encryptedBytes, AesEcbMode aes, FixedXor fxor, int blockSize, String key) {
@@ -68,14 +71,15 @@ public class CbcMode {
     AesEcbMode aes = new AesEcbMode();
     BreakRepeatKeyXor brkxor = new BreakRepeatKeyXor();
     FixedXor fxor = new FixedXor();
+    HexToBase64 hexToBase64 = new HexToBase64();
     File file = new File("second/blockcipher/10.txt");
     String text = brkxor.getBase64StringFromFile(file.getAbsolutePath());
     byte[] encryptedBytes = aes.getBytesFromBase64EncodedFile(file.getAbsolutePath(), brkxor);
     String decrypted = decrypt(encryptedBytes, aes, fxor, BLOCK_SIZE, KEY);
     System.out.println(decrypted);
-    String encrypted = encrypt(decrypted, aes, fxor, BLOCK_SIZE, KEY);
-    System.out.println("Encryption was success "+ text.equals(encrypted));
-    // System.out.println(encrypted);
+    byte[] encrypted = encrypt(decrypted, aes, fxor, BLOCK_SIZE, KEY, CRYPT_ALGO_MODE_PAD);
+    System.out.println("Encryption was success "+ text.equals(new String(encrypted)));
+    System.out.println("Encryption not success. Need to let libraries do all the work.");
   }
 
   public static void main(String [] args) {
