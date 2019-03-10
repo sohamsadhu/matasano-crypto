@@ -1,11 +1,15 @@
 // Problem 10
 // Implement CBC mode
-// CBC mode is a block cipher mode that allows us to encrypt irregularly-sized messages, despite the fact that a block cipher natively only transforms individual blocks.
+// CBC mode is a block cipher mode that allows us to encrypt irregularly-sized messages, despite 
+// the fact that a block cipher natively only transforms individual blocks.
 // In CBC mode, each ciphertext block is added to the next plaintext block before the next call to the cipher core.
-// The first plaintext block, which has no associated previous ciphertext block, is added to a "fake 0th ciphertext block" called the initialization vector, or IV.
-// Implement CBC mode by hand by taking the ECB function you wrote earlier, making it encrypt instead of decrypt (verify this by decrypting 
+// The first plaintext block, which has no associated previous ciphertext block, is added to a 
+// "fake 0th ciphertext block" called the initialization vector, or IV.
+// Implement CBC mode by hand by taking the ECB function you wrote earlier, making it encrypt 
+// instead of decrypt (verify this by decrypting 
 // whatever you encrypt to test), and using your XOR function from the previous exercise to combine them.
-// The file here is intelligible (somewhat) when CBC decrypted against "YELLOW SUBMARINE" with an IV of all ASCII 0 (\x00\x00\x00 &c)
+// The file here is intelligible (somewhat) when CBC decrypted against "YELLOW SUBMARINE" with 
+// an IV of all ASCII 0 (\x00\x00\x00 &c)
 
 package second.blockcipher;
 
@@ -31,7 +35,8 @@ public class CbcMode {
     0x00, 0x00, 0x00, 0x00, 
     0x00, 0x00, 0x00, 0x00};
 
-  public byte[] encrypt(String plainText, AesEcbMode aes, FixedXor fxor, int blockSize, String key, String cryptAlgoModePad) {
+  public byte[] encrypt(String plainText, AesEcbMode aes, FixedXor fxor, int blockSize, String key, 
+      String cryptAlgoModePad) {
     Pkcs7Padding pkcs7Padding = new Pkcs7Padding();
     byte[] plainBytes = pkcs7Padding.padBytes(plainText.getBytes(), blockSize);
     int length        = plainBytes.length;
@@ -42,7 +47,8 @@ public class CbcMode {
     for (int i = 0; i < (length - blockSize); i += blockSize) {
       System.arraycopy(plainBytes, i, block, 0, blockSize);
       try  {
-        temp = aes.cryptBytes(fxor.xorTwoByteArrays(block, previous), key, cryptAlgoModePad, null, ENCRYPT_MODE);
+        temp = aes.cryptBytes(fxor.xorTwoByteArrays(block, previous), key, cryptAlgoModePad, 
+                  null, ENCRYPT_MODE);
       } catch(Exception e) {
         e.printStackTrace();
       }
@@ -60,7 +66,7 @@ public class CbcMode {
       System.arraycopy(encryptedBytes, i, block, 0, blockSize);
       try {
         decryptBuilder.append(new String(
-          fxor.xorTwoByteArrays(aes.cryptBytes(block, key, null, null, DECRYPT_MODE), previous)));
+        fxor.xorTwoByteArrays(aes.cryptBytes(block, key, null, null, DECRYPT_MODE), previous)));
       } catch(Exception e) {}
       System.arraycopy(block, 0, previous, 0, blockSize);
     }
